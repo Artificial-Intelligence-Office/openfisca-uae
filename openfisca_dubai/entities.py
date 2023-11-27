@@ -44,6 +44,35 @@ Household = build_entity(
         ],
     )
 
+Business = build_entity(
+    key = "business",
+    plural = "businesses",
+    label = "Any activity conducted regularly, on an ongoing and independent basis by any Person and in any location, such as industrial, commercial, agricultural, vocational, professional, service or excavation activities or any other activity related to the use of tangible or intangible properties.",
+    doc = """
+   """,
+    roles = [
+        {
+            "key": "government",
+            "plural": "governments",
+            "label": "Governments",
+            "subroles": ["government_controlled_entity", "government_entity"],
+            "doc": """
+            Government Controlled Entity: Any juridical person, directly or indirectly wholly owned and controlled by a Government Entity, as specified in a decision issued by the Cabinet at the suggestion of the Minister.
+            Government Entity: The Federal Government, Local Governments, ministries, government departments, government agencies, authorities and public institutions of the Federal Government or Local Governments.
+            """,
+            },
+        {
+            "key": "pension_fund",
+            "plural": "pension_funds",
+            "label": "Pension Funds",
+            "doc": """Public pension funds and social security funds are typically initiated, sponsored and governed by a Federal or Local Government Entity. However, as the entitlement to receive the benefits from these funds and any surplus assets of the fund normally rests with the beneficiaries, they are not typically considered to be wholly owned and controlled by the Government Entity which oversees them.
+            Recognising their importance, public pension funds and social security funds can make an application to the FTA to be exempt from Corporate Tax.
+            """,
+            },
+        ],
+    )
+
+
 Person = build_entity(
     key = "person",
     plural = "persons",
@@ -61,4 +90,5 @@ Person = build_entity(
     is_person = True,
     )
 
-entities = [Household, Person]
+
+entities = [Household, Business, Person]

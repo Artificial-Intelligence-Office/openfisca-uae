@@ -1,0 +1,11 @@
+description: Amount that qualifies a business for small business relief
+metadata:
+  reference: https://law.gov.example/basic-income/amount
+  unit: currency-AED
+values:
+  # This parameter is only defined since the 1st of Dec 2023.
+  2023-06-01:
+    value: 3000000.00
+    metadata:
+      reference: https://law.gov.example/basic-income/amount/2015-12
+

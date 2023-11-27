@@ -1,0 +1,13 @@
+POST http://127.0.0.1:5000/calculate HTTP/1.1
+content-type: application/json
+
+
+{
+    "persons": {
+        "John": {
+            "taxable_income": { "2024": 400000 },
+            "corporate_tax": { "2024": null },
+            "is_government": { "2024": true }
+         }
+    }
+}

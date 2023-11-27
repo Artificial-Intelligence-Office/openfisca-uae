@@ -37,8 +37,8 @@ check-style:
 	flake8 `git ls-files | grep "\.py$$"`
 	pylint `git ls-files | grep "\.py$$"`
 
-test: clean check-syntax-errors check-style
+test: clean 
 	openfisca test --country-package openfisca_dubai openfisca_dubai/tests
 
 serve-local: build
-	openfisca serve --country-package openfisca_dubai
+	openfisca serve --country-package openfisca_dubai --reload

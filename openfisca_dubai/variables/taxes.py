@@ -9,19 +9,98 @@ See https://openfisca.org/doc/key-concepts/variables.html
 # Import from numpy the operations you need to apply on OpenFisca's population vectors
 # Import from openfisca-core the Python objects used to code the legislation in OpenFisca
 from numpy import maximum as max_
-from openfisca_core.periods import MONTH, YEAR
 from openfisca_core.variables import Variable
 
 # Import the Entities specifically defined for this tax and benefit system
-from openfisca_dubai.entities import Household, Person
+from openfisca_core import holders, periods, variables
+from openfisca_dubai import entities
+
+import numpy as np
+
+
+class corporate_tax(Variable):
+    value_type = float
+    entity = entities.Person
+    definition_period = periods.YEAR
+    label = "Corporate tax"
+    reference = "https://mof.gov.ae/wp-content/uploads/2022/12/Federal-Decree-Law-No.-47-of-2022-EN.pdf"
+
+    def formula(person, period, parameters):
+        """˘
+        Income tax.
+
+        The formula to compute the income tax for a given person at a given period
+        """
+        # corporate tax rate from the yaml file
+        scale_1 = parameters(period).taxes.corporate_tax_rate
+        taxable_income = scale_1.calc(person("taxable_income", period))
+
+
+        
+        # calculates if exempt
+        is_government = person("is_government", period)
+        is_person_exempt = person("exempt_person", period)
+        is_small_business = person("taxable_income", period) <= parameters(period).benefits.small_business
+
+        is_excempt = np.logical_not(is_government) * np.logical_not(is_person_exempt) * is_small_business
+
+        return taxable_income * is_excempt 
+
+class is_government(Variable):
+    value_type = bool
+    entity = entities.Person
+    definition_period = periods.YEAR
+    label = "A government entity"
+    reference = "https://mof.gov.ae/wp-content/uploads/2022/12/Federal-Decree-Law-No.-47-of-2022-EN.pdf"
+
+class taxable_income(Variable):
+    value_type = float
+    entity = entities.Person
+    definition_period = periods.YEAR
+    label = (
+        "The income that is subject to Corporate Tax under Federal Decree Law No. 47"
+        )
+    reference = "https://mof.gov.ae/wp-content/uploads/2022/12/Federal-Decree-Law-No.-47-of-2022-EN.pdf"
+
+    # Can add a formula later
+
+
+class exempt_person(Variable):
+    value_type = bool
+    entity = entities.Person
+    definition_period = periods.YEAR
+    label = "A Person exempt from Corporate Tax under Article 4 of Federal Decree Law No. 47"
+    reference = (
+        "https://mof.gov.ae/wp-content/uploads/2022/12/Federal-Decree-Law-No.-47-of-2022-EN.pdf"  # Always use the most official source
+    )
+
+class exempt_entity(Variable):
+    value_type = bool
+    entity = entities.Person
+    definition_period = periods.YEAR
+    label = "An entity exempt from Corporate Tax under Article 4 of Federal Decree Law No. 47"
+    reference = (
+        "https://mof.gov.ae/wp-content/uploads/2022/12/Federal-Decree-Law-No.-47-of-2022-EN.pdf"  # Always use the most official source
+    )
+    def formula(person, period, parameters):
+        """
+        Exempt businesses.
+
+        Tax exempt entities include government entities, qualifying public benefit entities, pension funds, and certain free zone businesses for activities/income specifically exempted 
+        """
+
+        return business.has_role(entities.Business.GOVERNMENT) or business.has_role(entities.Business.PENSION_FUND)
+
 
 
 class income_tax(Variable):
     value_type = float
-    entity = Person
-    definition_period = MONTH
+    entity = entities.Person
+    definition_period = periods.MONTH
     label = "Income tax"
-    reference = "https://law.gov.example/income_tax"  # Always use the most official source
+    reference = (
+        "https://law.gov.example/income_tax"  # Always use the most official source
+    )
 
     def formula(person, period, parameters):
         """
@@ -34,8 +113,8 @@ class income_tax(Variable):
 
 class social_security_contribution(Variable):
     value_type = float
-    entity = Person
-    definition_period = MONTH
+    entity = entities.Person
+    definition_period = periods.MONTH
     label = "Progressive contribution paid on salaries to finance social security"
     reference = "https://law.gov.example/social_security_contribution"  # Always use the most official source
 
@@ -53,10 +132,12 @@ class social_security_contribution(Variable):
 
 class housing_tax(Variable):
     value_type = float
-    entity = Household
-    definition_period = YEAR  # This housing tax is defined for a year.
+    entity = entities.Household
+    definition_period = periods.YEAR  # This housing tax is defined for a year.
     label = "Tax paid by each household proportionally to the size of its accommodation"
-    reference = "https://law.gov.example/housing_tax"  # Always use the most official source
+    reference = (
+        "https://law.gov.example/housing_tax"  # Always use the most official source
+    )
 
     def formula(household, period, parameters):
         """
@@ -70,11 +151,15 @@ class housing_tax(Variable):
         accommodation_size = household("accommodation_size", january)
 
         tax_params = parameters(period).taxes.housing_tax
-        tax_amount = max_(accommodation_size * tax_params.rate, tax_params.minimal_amount)
+        tax_amount = max_(
+            accommodation_size * tax_params.rate, tax_params.minimal_amount
+        )
 
         # `housing_occupancy_status` is an Enum variable
         occupancy_status = household("housing_occupancy_status", january)
-        HousingOccupancyStatus = occupancy_status.possible_values  # Get the enum associated with the variable
+        HousingOccupancyStatus = (
+            occupancy_status.possible_values
+        )  # Get the enum associated with the variable
         # To access an enum element, we use the `.` notation.
         tenant = occupancy_status == HousingOccupancyStatus.tenant
         owner = occupancy_status == HousingOccupancyStatus.owner

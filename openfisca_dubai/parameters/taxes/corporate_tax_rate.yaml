@@ -1,0 +1,18 @@
+# The social_security_contribution is calculated with a marginal scale. Marginal scales are represented with a specific structure.
+description: Corporate tax rate
+metadata:
+  threshold_unit: currency-AED
+  rate_unit: /1
+brackets: # TODO: may need to come back to this to check the date 
+- rate:
+    2023-06-01:
+      value: 0.0
+  threshold:
+    2023-06-01:
+      value: 0.0
+- rate:
+    2023-06-01:
+      value: 0.09
+  threshold:
+    2023-06-01:
+      value: 375000.00
