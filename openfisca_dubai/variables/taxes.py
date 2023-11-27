@@ -31,20 +31,25 @@ class corporate_tax(Variable):
 
         The formula to compute the income tax for a given person at a given period
         """
-        # corporate tax rate from the yaml file
-        scale_1 = parameters(period).taxes.corporate_tax_rate
-        taxable_income = scale_1.calc(person("taxable_income", period))
+        # corporate tax rate always applies on the taxable income
+        corporate_tax_rate = parameters(period).taxes.corporate_tax_rate
+        taxable_income = corporate_tax_rate.calc(person("taxable_income", period))
 
-
-        
-        # calculates if exempt
+        # exemption rules
         is_government = person("is_government", period)
         is_person_exempt = person("exempt_person", period)
-        is_small_business = person("taxable_income", period) <= parameters(period).benefits.small_business
+        is_small_business = (
+            person("revenue", period) <= parameters(period).benefits.small_business
+        )
 
-        is_excempt = np.logical_not(is_government) * np.logical_not(is_person_exempt) * is_small_business
+        is_exempt = (
+            np.logical_not(is_government)
+            * np.logical_not(is_person_exempt)
+            * np.logical_not(is_small_business)
+        )
 
-        return taxable_income * is_excempt 
+        return taxable_income * is_exempt
+
 
 class is_government(Variable):
     value_type = bool
@@ -53,13 +58,24 @@ class is_government(Variable):
     label = "A government entity"
     reference = "https://mof.gov.ae/wp-content/uploads/2022/12/Federal-Decree-Law-No.-47-of-2022-EN.pdf"
 
+
 class taxable_income(Variable):
     value_type = float
     entity = entities.Person
     definition_period = periods.YEAR
     label = (
         "The income that is subject to Corporate Tax under Federal Decree Law No. 47"
-        )
+    )
+    reference = "https://mof.gov.ae/wp-content/uploads/2022/12/Federal-Decree-Law-No.-47-of-2022-EN.pdf"
+
+    # Can add a formula later
+
+
+class revenue(Variable):
+    value_type = float
+    entity = entities.Person
+    definition_period = periods.YEAR
+    label = "The gross amount of income derived"
     reference = "https://mof.gov.ae/wp-content/uploads/2022/12/Federal-Decree-Law-No.-47-of-2022-EN.pdf"
 
     # Can add a formula later
@@ -70,27 +86,26 @@ class exempt_person(Variable):
     entity = entities.Person
     definition_period = periods.YEAR
     label = "A Person exempt from Corporate Tax under Article 4 of Federal Decree Law No. 47"
-    reference = (
-        "https://mof.gov.ae/wp-content/uploads/2022/12/Federal-Decree-Law-No.-47-of-2022-EN.pdf"  # Always use the most official source
-    )
+    reference = "https://mof.gov.ae/wp-content/uploads/2022/12/Federal-Decree-Law-No.-47-of-2022-EN.pdf"  # Always use the most official source
+
 
 class exempt_entity(Variable):
     value_type = bool
     entity = entities.Person
     definition_period = periods.YEAR
     label = "An entity exempt from Corporate Tax under Article 4 of Federal Decree Law No. 47"
-    reference = (
-        "https://mof.gov.ae/wp-content/uploads/2022/12/Federal-Decree-Law-No.-47-of-2022-EN.pdf"  # Always use the most official source
-    )
+    reference = "https://mof.gov.ae/wp-content/uploads/2022/12/Federal-Decree-Law-No.-47-of-2022-EN.pdf"  # Always use the most official source
+
     def formula(person, period, parameters):
         """
         Exempt businesses.
 
-        Tax exempt entities include government entities, qualifying public benefit entities, pension funds, and certain free zone businesses for activities/income specifically exempted 
+        Tax exempt entities include government entities, qualifying public benefit entities, pension funds, and certain free zone businesses for activities/income specifically exempted
         """
 
-        return business.has_role(entities.Business.GOVERNMENT) or business.has_role(entities.Business.PENSION_FUND)
-
+        return business.has_role(entities.Business.GOVERNMENT) or business.has_role(
+            entities.Business.PENSION_FUND
+        )
 
 
 class income_tax(Variable):

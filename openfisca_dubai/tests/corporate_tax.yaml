@@ -1,41 +1,37 @@
 # Test files describe situations and their expected outcomes
 # We can run this test on our command line using `openfisca-run-test income_tax.yaml`
 
-- name: Someone making 400000 should pay  of taxable income
+- name: Before 2024 no one should pay tax rate
   period: 2017
   input:
     taxable_income: 400000
+    revenue: 5000000
   output:
     corporate_tax: 0
 
-- name: Someone making 400000 should pay of taxable income
+- name: Someone making 4000000 should pay of taxable income after deduction
   period: 2024
   input:
     taxable_income: 4000000
+    revenue: 5000000
     exempt_person: false
   output:
-    corporate_tax: 2250
+    corporate_tax: 326250
 
-- name: Someone making 400000 should pay of taxable income
+- name: Someone making 4000000 should not pay if they are a government
   period: 2024
   input:
-    taxable_income: 400000
-    exempt_person: true
-  output:
-    corporate_tax: 0
-
-- name: A government entity
-  period: 2024
-  input:
-    taxable_income: 400000
+    taxable_income: 4000000
+    revenue: 5000000
     is_government: true
   output:
     corporate_tax: 0
 
-- name: A small business
+- name: A small business with less revenue than the threshold should not be taxed
   period: 2024
   input:
-    revnue: 2000000
+    taxable_income: 1000000
+    revenue: 2000000
   output:
     corporate_tax: 0
 
@@ -43,5 +39,6 @@
   period: 2024
   input:
     revenue: 6000000
+    taxable_income: 5000000
   output:
-    corporate_tax: 540000
+    corporate_tax: 416250
