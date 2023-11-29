@@ -107,13 +107,22 @@ class taxable_income(Variable):
 
         net_interest = interest_expense - interest_income
         max_interest_deduction = max(0.3 * ebitda, 12000000)
+        accounting_income = ebitda
+
+        print(f"net_interest: {net_interest}")
+        print(f"max_interest_deduction: {max_interest_deduction}")
+        print(f"accounting_income: {accounting_income}")
 
         if net_interest > max_interest_deduction:
             disallowed_interest = net_interest - max_interest_deduction
-            accounting_income += disallowed_interest
+            accounting_income -= disallowed_interest
+        else:
+            accounting_income -= max_interest_deduction
 
         accounting_income -= depreciation
         accounting_income -= amortization
+
+        print(f"accounting_income: {accounting_income}")
 
         taxable_income = accounting_income
 

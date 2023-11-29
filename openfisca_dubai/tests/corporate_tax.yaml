@@ -52,11 +52,12 @@
   output:
     corporate_tax: 0
 
-- name: An entity with tax credits more than 75% of taxable income
-  period: 2024
+- name: Calculate taxable income based on, interest_expense, interest_income, EBITDA, depreciation, amortization
+  period: 2026
   input:
-    revenue: 6000000
-    taxable_income: 5000000
-    tax_credits: 6000000
+    revenue: 200000000 #200M
+    interest_expense: 80000000 #80M
+    interest_income: 60000000 #60M
+    EBITDA: 180000000 #180M
   output:
-    corporate_tax: 78750
+    taxable_income: 129000000 #129M
