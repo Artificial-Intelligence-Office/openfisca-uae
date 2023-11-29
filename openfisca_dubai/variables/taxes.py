@@ -33,22 +33,43 @@ class corporate_tax(Variable):
         """
         # corporate tax rate always applies on the taxable income
         corporate_tax_rate = parameters(period).taxes.corporate_tax_rate
-        taxable_income = corporate_tax_rate.calc(person("taxable_income", period))
+        taxable_income = person("taxable_income", period)
 
         # exemption rules
+        is_pension_fund = person("is_pension_fund", period)
         is_government = person("is_government", period)
         is_person_exempt = person("exempt_person", period)
         is_small_business = (
             person("revenue", period) <= parameters(period).benefits.small_business
         )
 
+        try:
+            tax_credits = person("tax_credits", period)
+        except:
+            tax_credits = 0
+
+        max_tax_credits = 0.75 * taxable_income
+        actual_tax_credits = min(tax_credits, max_tax_credits)
+        taxable_income -= actual_tax_credits
+
         is_exempt = (
             np.logical_not(is_government)
             * np.logical_not(is_person_exempt)
             * np.logical_not(is_small_business)
+            * np.logical_not(is_pension_fund)
         )
 
-        return taxable_income * is_exempt
+        tax_payable = corporate_tax_rate.calc(taxable_income)
+
+        return tax_payable * is_exempt
+
+
+class tax_credits(Variable):
+    value_type = float
+    entity = entities.Person
+    definition_period = periods.YEAR
+    label = "Tax Credits"
+    reference = "https://mof.gov.ae/wp-content/uploads/2022/12/Federal-Decree-Law-No.-47-of-2022-EN.pdf"
 
 
 class is_government(Variable):
@@ -56,6 +77,14 @@ class is_government(Variable):
     entity = entities.Person
     definition_period = periods.YEAR
     label = "A government entity"
+    reference = "https://mof.gov.ae/wp-content/uploads/2022/12/Federal-Decree-Law-No.-47-of-2022-EN.pdf"
+
+
+class is_pension_fund(Variable):
+    value_type = bool
+    entity = entities.Person
+    definition_period = periods.YEAR
+    label = "A pension fund"
     reference = "https://mof.gov.ae/wp-content/uploads/2022/12/Federal-Decree-Law-No.-47-of-2022-EN.pdf"
 
 
@@ -69,13 +98,104 @@ class taxable_income(Variable):
     reference = "https://mof.gov.ae/wp-content/uploads/2022/12/Federal-Decree-Law-No.-47-of-2022-EN.pdf"
 
     # Can add a formula later
+    def formula(person, period, parameters):
+        interest_expense = person("interest_expense", period)
+        interest_income = person("interest_income", period)
+        depreciation = person("depreciation", period)
+        ebitda = person("EBITDA", period)
+        amortization = person("amortization", period)
+
+        net_interest = interest_expense - interest_income
+        max_interest_deduction = max(0.3 * ebitda, 12000000)
+
+        if net_interest > max_interest_deduction:
+            disallowed_interest = net_interest - max_interest_deduction
+            accounting_income += disallowed_interest
+
+        accounting_income -= depreciation
+        accounting_income -= amortization
+
+        taxable_income = accounting_income
+
+        try:
+            tax_credits = person("tax_credits", period)
+        except:
+            tax_credits = 0
+
+        max_tax_credits = 0.75 * taxable_income
+        actual_tax_credits = min(tax_credits, max_tax_credits)
+        taxable_income -= actual_tax_credits
+
+        return taxable_income
+
+
+class accounting_income(Variable):
+    value_type = float
+    entity = entities.Person
+    definition_period = periods.YEAR
+    label = """
+    The accounting net profit or loss for the relevant Tax Period
+    as per the financial statements prepared in accordance
+    with the provisions of Article 20 of this Decree-Law
+    """
+    reference = "https://mof.gov.ae/wp-content/uploads/2022/12/Federal-Decree-Law-No.-47-of-2022-EN.pdf"
+
+
+class interest_expense(Variable):
+    value_type = float
+    entity = entities.Person
+    definition_period = periods.YEAR
+    label = """
+    Interest Expense
+    """
+    reference = "https://mof.gov.ae/wp-content/uploads/2022/12/Federal-Decree-Law-No.-47-of-2022-EN.pdf"
+
+
+class interest_income(Variable):
+    value_type = float
+    entity = entities.Person
+    definition_period = periods.YEAR
+    label = """
+    Interest Expense
+    """
+    reference = "https://mof.gov.ae/wp-content/uploads/2022/12/Federal-Decree-Law-No.-47-of-2022-EN.pdf"
+
+
+class EBITDA(Variable):
+    value_type = float
+    entity = entities.Person
+    definition_period = periods.YEAR
+    label = """
+    Interest Expense
+    """
+    reference = "https://mof.gov.ae/wp-content/uploads/2022/12/Federal-Decree-Law-No.-47-of-2022-EN.pdf"
+
+
+class depreciation(Variable):
+    value_type = float
+    entity = entities.Person
+    definition_period = periods.YEAR
+    label = """
+    Interest Expense
+    """
+    reference = "https://mof.gov.ae/wp-content/uploads/2022/12/Federal-Decree-Law-No.-47-of-2022-EN.pdf"
+
+
+class amortization(Variable):
+    value_type = float
+    entity = entities.Person
+    definition_period = periods.YEAR
+    label = """
+    Interest Expense
+    """
+    reference = "https://mof.gov.ae/wp-content/uploads/2022/12/Federal-Decree-Law-No.-47-of-2022-EN.pdf"
 
 
 class revenue(Variable):
     value_type = float
     entity = entities.Person
     definition_period = periods.YEAR
-    label = "The gross amount of income derived"
+    label = "The gross amount of income derived during a Tax Period"
     reference = "https://mof.gov.ae/wp-content/uploads/2022/12/Federal-Decree-Law-No.-47-of-2022-EN.pdf"
 
     # Can add a formula later

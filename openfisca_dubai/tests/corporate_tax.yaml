@@ -42,3 +42,21 @@
     taxable_income: 5000000
   output:
     corporate_tax: 416250
+
+- name: A pension fund
+  period: 2024
+  input:
+    revenue: 6000000
+    taxable_income: 5000000
+    is_pension_fund: true
+  output:
+    corporate_tax: 0
+
+- name: An entity with tax credits more than 75% of taxable income
+  period: 2024
+  input:
+    revenue: 6000000
+    taxable_income: 5000000
+    tax_credits: 6000000
+  output:
+    corporate_tax: 78750

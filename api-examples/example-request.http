@@ -5,9 +5,9 @@ content-type: application/json
 {
     "persons": {
         "John": {
-            "taxable_income": { "2024": 400000 },
-            "corporate_tax": { "2024": null },
-            "is_government": { "2024": true }
+            "is_government": { "2024": true },
+            "taxable_income": { "2024": null },
+            "corporate_tax": { "2024": null }
          }
     }
 }
