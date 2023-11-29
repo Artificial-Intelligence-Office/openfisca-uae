@@ -1,28 +1,25 @@
-# Test files describe situations and their expected outcomes
-# We can run this test on our command line using `openfisca-run-test income_tax.yaml`
-
 - name: Before 2024 no one should pay tax rate
   period: 2017
   input:
     taxable_income: 400000
-    revenue: 5000000
+    revenue: 5e6
   output:
     corporate_tax: 0
 
-- name: Someone making 4000000 should pay of taxable income after deduction
+- name: Someone making 4e6 should pay of taxable income after deduction
   period: 2024
   input:
-    taxable_income: 4000000
-    revenue: 5000000
+    taxable_income: 4e6
+    revenue: 5e6
     exempt_person: false
   output:
     corporate_tax: 326250
 
-- name: Someone making 4000000 should not pay if they are a government
+- name: Someone making 4e6 should not pay if they are a government
   period: 2024
   input:
-    taxable_income: 4000000
-    revenue: 5000000
+    taxable_income: 4e6
+    revenue: 5e6
     is_government: true
   output:
     corporate_tax: 0
@@ -30,24 +27,24 @@
 - name: A small business with less revenue than the threshold should not be taxed
   period: 2024
   input:
-    taxable_income: 1000000
-    revenue: 2000000
+    taxable_income: 1e6
+    revenue: 2e6
   output:
     corporate_tax: 0
 
 - name: A big business
   period: 2024
   input:
-    revenue: 6000000
-    taxable_income: 5000000
+    revenue: 6e6
+    taxable_income: 5e6
   output:
     corporate_tax: 416250
 
 - name: A pension fund
   period: 2024
   input:
-    revenue: 6000000
-    taxable_income: 5000000
+    revenue: 6e6
+    taxable_income: 5e6
     is_pension_fund: true
   output:
     corporate_tax: 0
@@ -55,9 +52,52 @@
 - name: Calculate taxable income based on, interest_expense, interest_income, EBITDA, depreciation, amortization
   period: 2026
   input:
-    revenue: 200000000 #200M
-    interest_expense: 80000000 #80M
-    interest_income: 60000000 #60M
-    EBITDA: 180000000 #180M
+    revenue: 200e6
+    interest_expense: 80e6
+    interest_income: 60e6
+    carry_forward_interest: 11e6
+    EBITDA: 180e6
+
   output:
-    taxable_income: 129000000 #129M
+    taxable_income: 149e6
+
+- name: Calculate taxable income based on, interest_expense, interest_income, EBITDA, depreciation, amortization (without carry)
+  period: 2026
+  input:
+    revenue: 200e6
+    interest_expense: 80e6
+    interest_income: 60e6
+    EBITDA: 180e6
+  output:
+    taxable_income: 160e6
+
+- name: Calculate taxable income based where net interest is greater than 30% EBDTA (without carried interest)
+  period: 2026
+  input:
+    revenue: 200e6
+    interest_expense: 100e6
+    interest_income: 10e6
+    EBITDA: 200e6
+  output:
+    taxable_income: 140e6
+
+- name: Calculate taxable income based where net interest is greater than 30% EBDTA (with carried interest)
+  period: 2026
+  input:
+    revenue: 200e6
+    interest_expense: 100e6
+    interest_income: 60e6
+    carry_forward_interest: 30e6
+    EBITDA: 200e6
+  output:
+    taxable_income: 140e6
+
+- name: Calculate taxable income based where net interest is greater than 30% EBDTA
+  period: 2026
+  input:
+    revenue: 200e6
+    interest_expense: 190e6
+    interest_income: 60e6
+    EBITDA: 400e6
+  output:
+    taxable_income: 280e6

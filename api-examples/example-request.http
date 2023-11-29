@@ -5,8 +5,8 @@ content-type: application/json
 {
     "persons": {
         "John": {
-            "is_government": { "2024": true },
-            "taxable_income": { "2024": null },
+            "EBITDA": { "2024": 0 },
+            "revenue": { "2024": 0 },
             "corporate_tax": { "2024": null }
          }
     }
