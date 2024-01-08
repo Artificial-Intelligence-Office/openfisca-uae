@@ -13,7 +13,6 @@ import os
 from openfisca_core.taxbenefitsystems import TaxBenefitSystem
 
 from openfisca_dubai import entities
-from openfisca_dubai.situation_examples import couple
 
 
 COUNTRY_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -37,5 +36,4 @@ class CountryTaxBenefitSystem(TaxBenefitSystem):
         self.open_api_config = {
             "variable_example": "disposable_income",
             "parameter_example": "taxes.income_tax_rate",
-            "simulation_example": couple,
-            }
+        }
