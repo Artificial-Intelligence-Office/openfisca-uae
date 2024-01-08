@@ -48,7 +48,7 @@ class corporate_tax(Variable):
         except:
             tax_credits = 0
 
-        max_tax_credits = 0.75 * taxable_income
+        max_tax_credits = parameters(period).taxes.max_tax_credits * taxable_income
         actual_tax_credits = min(tax_credits, max_tax_credits)
         taxable_income -= actual_tax_credits
 
