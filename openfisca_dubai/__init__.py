@@ -33,7 +33,6 @@ class CountryTaxBenefitSystem(TaxBenefitSystem):
         self.load_parameters(param_path)
 
         # We define which variable, parameter and simulation example will be used in the OpenAPI specification
-        self.open_api_config = {
-            "variable_example": "disposable_income",
-            "parameter_example": "taxes.income_tax_rate",
-        }
+        # self.open_api_config = {
+        #     "parameter_example": "taxes.income_tax_rate",
+        # }
